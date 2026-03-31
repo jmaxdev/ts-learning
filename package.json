@@ -2,18 +2,18 @@
   "name": "ts-learning",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "./src/7_api/server.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "dev": "tsc --watch"
+    "start": "bun run ./src/7_api/server.ts",
+    "dev": "bun --watch ./src/7_api/server.ts"
   },
+  "type": "module",
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module",
   "devDependencies": {
+    "@types/bun": "^1.3.11",
     "@types/node": "^25.5.0",
     "typescript": "^6.0.2"
   }

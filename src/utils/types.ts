@@ -13,5 +13,14 @@ type UserEntity = User & UserID
 
 type RGB = [number, number, number, number?]
 
+/**
+ * Type definition for a route handler.
+ * @param req - The HTTP request.
+ * @param params - The route parameters.
+ * @param method - The HTTP method.
+ * @returns The HTTP response.
+ */
+type TypeHandler = (req: Request, params: Record<string, string>, method: string) => Response | Promise<Response>
 
-export type { User, UserEntity, RGB }
+
+export type { User, UserEntity, RGB, TypeHandler }
