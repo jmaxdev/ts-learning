@@ -20,7 +20,10 @@ type RGB = [number, number, number, number?]
  * @param method - The HTTP method.
  * @returns The HTTP response.
  */
-type TypeHandler = (req: Request, params: Record<string, string>, method: string) => Response | Promise<Response>
-
+type TypeHandler = (
+  req: Request,
+  params: Record<string, string | undefined>,
+  method: string
+) => Response | Promise<Response>;
 
 export type { User, UserEntity, RGB, TypeHandler }

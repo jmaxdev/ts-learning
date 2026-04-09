@@ -4,7 +4,7 @@ import type { TypeHandler } from "../../utils/types.ts";
 /**
  * GET - Returns a simple Hello World message.
  */
-export const GET: TypeHandler = (req, params, method) => {
+const GET: TypeHandler = (req, params, method) => {
   return Payload({
     message: "Hello from modular GET!",
     timestamp: Date.now(),
@@ -12,4 +12,5 @@ export const GET: TypeHandler = (req, params, method) => {
     method,
   });
 };
- 
+
+export { GET } 

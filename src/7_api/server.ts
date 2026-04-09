@@ -1,37 +1,43 @@
-import { PORT } from "../utils/config.ts"
-import { Payload } from "../utils/payload.ts"
-import type { TypeHandler } from "../utils/types.ts"
+const router = new Bun.FileSystemRouter({
+  style: "nextjs", // style of the router
+  dir: import.meta.dir + "/api", // directory to search for routes
+  fileExtensions: ["ts", "js"] // only read ts and js files
+});
 
-// Importing all method constants (* as HelloHandler) from the handler file
-import * as HelloHandler from "./handlers/hello.ts"
-import * as WeatherHandler from "./handlers/weather.ts"
+Bun.serve({
+  port: 3000,
+  async fetch(req) {
+    const url = new URL(req.url);
 
-/**
- * A helper to dispatch the correct method handler from a module.
- * Returns a 405 if the method (GET, POST, etc.) isn't exported by the module.
- */
-const handleMethods = (module: any): TypeHandler => async (req, params, method) => {
-  const handler = module[method] as TypeHandler | undefined
-  return handler ? await handler(req, params, method) : Payload({ message: "Method Not Allowed" }, 405)
-}
-
-const RoutesHandler: Record<string, TypeHandler> = {
-  "/api/hello": handleMethods(HelloHandler),
-  "/api/weather": handleMethods(WeatherHandler),
-}
-
-const server = Bun.serve({
-  port: PORT,
-  async fetch(req: Request) {
-    const url = new URL(req.url)
-    const handler = RoutesHandler[url.pathname]
-
-    if (handler) {
-      return await handler(req, Object.fromEntries(url.searchParams), req.method)
+    // if the url doesn't start with /api, return not found
+    if (!url.pathname.startsWith("/api")) {
+      return new Response("Not Found", { status: 404 });
     }
 
-    return Payload({ message: "Not Found" }, 404)
-  },
-})
+    // remove /api from the url
+    const internalPath = url.pathname.replace(/^\/api/, "") || "/";
+    
+    // create a new request with the internal path
+    const virtualReq = new Request(new URL(internalPath, url.origin), req);
+    // match the request with the router
+    const match = router.match(virtualReq);
 
-console.log(`Server running on port ${server.port}`)
+    if (match) {
+      // import the module
+      const module = await import(match.filePath);
+      
+      // get the handler for the method
+      const handler = module[req.method];
+
+      if (handler) {
+        // call the handler
+        return handler(req, match.params, req.method);
+      }
+      // if the handler is not found, return not allowed
+      return new Response(`Method ${req.method} Not Allowed`, { status: 405 });
+    }
+
+    // if the route is not found, return not found
+    return new Response("API Route Not Found", { status: 404 });
+  },
+});
